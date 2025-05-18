@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+  <button onclick="socket.emit('send_message', { 'content': 'Test message' })">Send Message</button>
+    
+  
+
+  <div id="notification-widget">
+    <div class="header">
+      <h2>Notifications</h2>
+      <span id="badge" class="badge">0</span>
+    </div>
+    <p id="notification-status">No notifications</p>
+    <ul id="notifications" class="notifications-list"></ul>
+  </div>
+
+<script>
+  (function(){
+    const widget = document.getElementById('notification-widget');
+    const ul = widget.querySelector('#notifications');
+    const status = widget.querySelector('#notification-status');
+    const badge = widget.querySelector('#badge');
+
+    
+    window.socket = io({ transports: ['websocket', 'polling'] });
+    let count = 0;
+
+    socket.on('connect', () => {
+      console.log('Notification widget connected.');
+    });
+
+    socket.on('new_notification', (data) => {
+      const li = document.createElement('li');
+      li.textContent = data.message;
+      ul.prepend(li);
+
+      count++;
+      badge.textContent = count;
+      badge.classList.add('visible');
+      status.textContent = `You have ${count} new notification${count>1?'s':''}`;
+      document.title = `(${count}) New Notifications`;
+    });
+  })();
+</script>
+
+
+   
+</html>
